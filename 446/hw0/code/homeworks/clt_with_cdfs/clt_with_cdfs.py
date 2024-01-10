@@ -12,6 +12,7 @@ def main():
         Y_k = np.sum(np.sign(np.random.randn(n, k)) * np.sqrt(1.0 / k), axis=1)
         plt.step(sorted(Y_k), np.arange(1, n + 1) / float(n), label=str(k))
 
+    print(n)
     # Plot gaussian
     Z = np.random.randn(n)
     plt.step(sorted(Z), np.arange(1, n + 1) / float(n), label="Gaussian")
@@ -30,8 +31,10 @@ def plot_settings():
     #   - Add label "Observations" on x axis
     #   - Add label "Probability" on y axis
     #   - Render the plot with plt.show() call
-
-    raise NotImplementedError("Your Code Goes Here")
+    plt.xlim(-3, 3)
+    plt.xlabel("Observations")
+    plt.ylabel("Probability")
+    plt.show()
 
 
 if __name__ == "__main__":

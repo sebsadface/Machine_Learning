@@ -72,7 +72,13 @@ def vanilla_solution(x: Vector, y: Vector, A: Matrix, B: Matrix) -> Vector:
         - In this context (and documentation of two functions above) vector means list of floats,
             and matrix means list of lists of floats
     """
-    raise NotImplementedError("Your Code Goes Here")
+    A_transpose = vanilla_transpose(A)
+    A_plus_A_transpose = [[A[i][j] + A_transpose[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+    A_plus_A_transpose_x = vanilla_matmul(A_plus_A_transpose, x)
+    
+    B_transpose_y = vanilla_matmul(vanilla_transpose(B), y)
+   
+    return [A_plus_A_transpose_x[i] + B_transpose_y[i] for i in range(len(A_plus_A_transpose_x))]
 
 
 @problem.tag("hw0-A")
@@ -95,7 +101,7 @@ def numpy_solution(
         - Make use of numpy docs: https://numpy.org/doc/
             You will use this link a lot throughout quarter, so it might be a good idea to bookmark it!
     """
-    raise NotImplementedError("Your Code Goes Here")
+    return (A + A.T) @ x + B.T @ y
 
 
 def main():
