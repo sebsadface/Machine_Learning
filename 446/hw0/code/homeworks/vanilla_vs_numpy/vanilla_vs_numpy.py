@@ -73,12 +73,15 @@ def vanilla_solution(x: Vector, y: Vector, A: Matrix, B: Matrix) -> Vector:
             and matrix means list of lists of floats
     """
     A_transpose = vanilla_transpose(A)
-    A_plus_A_transpose = [[A[i][j] + A_transpose[i][j] for j in range(len(A[0]))] for i in range(len(A))]
+    A_plus_A_transpose = [
+        [A[i][j] + A_transpose[i][j] for j in range(len(A[0]))] for i in range(len(A))
+    ]
     A_plus_A_transpose_x = vanilla_matmul(A_plus_A_transpose, x)
-    
     B_transpose_y = vanilla_matmul(vanilla_transpose(B), y)
-   
-    return [A_plus_A_transpose_x[i] + B_transpose_y[i] for i in range(len(A_plus_A_transpose_x))]
+    return [
+        A_plus_A_transpose_x[i] + B_transpose_y[i]
+        for i in range(len(A_plus_A_transpose_x))
+    ]
 
 
 @problem.tag("hw0-A")
@@ -127,7 +130,12 @@ def main():
         B_list = B.tolist()
 
         start = time.time_ns()
-        vanilla_result = vanilla_solution(x_list, y_list, A_list, B_list,)
+        vanilla_result = vanilla_solution(
+            x_list,
+            y_list,
+            A_list,
+            B_list,
+        )
         vanilla_time = time.time_ns() - start
         start = time.time_ns()
         numpy_result = numpy_solution(x, y, A, B)
