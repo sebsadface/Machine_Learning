@@ -20,7 +20,8 @@ class PolynomialRegression:
         # Fill in with matrix with the correct shape
         self.weight: np.ndarray = None  # type: ignore
         # You can add additional fields
-        raise NotImplementedError("Your Code Goes Here")
+        self.meanX: np.ndarray = None  # type: ignore
+        self.stdX: np.ndarray = None  # type: ignore
 
     @staticmethod
     @problem.tag("hw1-A")
@@ -38,7 +39,12 @@ class PolynomialRegression:
                 Note that the returned matrix will not include the zero-th power.
 
         """
-        raise NotImplementedError("Your Code Goes Here")
+        H = np.zeros((X.shape[0], degree))
+
+        for i in range(degree):
+            H[:, i] = X[:, 0] ** (i + 1)
+
+        return H
 
     @problem.tag("hw1-A")
     def fit(self, X: np.ndarray, y: np.ndarray):
@@ -52,7 +58,30 @@ class PolynomialRegression:
         Note:
             You will need to apply polynomial expansion and data standardization first.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        # polynomial expansion
+        H  = self.polyfeatures(X, self.degree)
+
+        n = len(X)
+
+        # standardize
+        self.meanX = np.mean(H, axis=0)
+        self.stdX = np.std(H, axis=0)
+        H = (H - self.meanX) / self.stdX
+
+        # add x^0 column
+        H_ = np.c_[np.ones([n, 1]), H]
+
+        n, d = H_.shape
+        # remove 1 for the extra column of ones we added to get the original num features
+        d = d - 1
+
+        # construct reg matrix
+        reg_matrix = self.reg_lambda * np.eye(d + 1)
+        reg_matrix[0, 0] = 0
+
+        # analytical solution (H'H + regMatrix)^-1 H' y
+        self.weight = np.linalg.solve(H_.T @ H_ + reg_matrix, H_.T @ y)
+
 
     @problem.tag("hw1-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -65,7 +94,19 @@ class PolynomialRegression:
         Returns:
             np.ndarray: Array of shape (n, 1) with predictions.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        # polynomial expansion
+        H  = self.polyfeatures(X, self.degree)
+
+        n = len(X)
+
+        # standardize
+        H = (H - self.meanX) / self.stdX
+
+        # add x^0 column
+        H_ = np.c_[np.ones([n, 1]), H]
+
+        # predict
+        return H_.dot(self.weight)
 
 
 @problem.tag("hw1-A")
@@ -79,7 +120,8 @@ def mean_squared_error(a: np.ndarray, b: np.ndarray) -> float:
     Returns:
         float: mean squared error between a and b.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    n = len(a)
+    return np.sum((a - b) ** 2) / n
 
 
 @problem.tag("hw1-A", start_line=5)
@@ -116,4 +158,10 @@ def learningCurve(
     errorTrain = np.zeros(n)
     errorTest = np.zeros(n)
     # Fill in errorTrain and errorTest arrays
-    raise NotImplementedError("Your Code Goes Here")
+    for i in range(n):
+        model = PolynomialRegression(degree=degree, reg_lambda=reg_lambda)
+        model.fit(Xtrain[0:i+1], Ytrain[0:i+1])
+        errorTrain[i] = mean_squared_error(model.predict(Xtrain[0:i+1]), Ytrain[0:i+1])
+        errorTest[i] = mean_squared_error(model.predict(Xtest), Ytest)
+
+    return (errorTrain, errorTest)

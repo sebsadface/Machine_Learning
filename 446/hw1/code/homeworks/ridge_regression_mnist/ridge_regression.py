@@ -2,6 +2,8 @@ import numpy as np
 
 from utils import load_dataset, problem
 
+import matplotlib.pyplot as plt
+
 
 @problem.tag("hw1-A")
 def train(x: np.ndarray, y: np.ndarray, _lambda: float) -> np.ndarray:
@@ -24,7 +26,8 @@ def train(x: np.ndarray, y: np.ndarray, _lambda: float) -> np.ndarray:
         np.ndarray: weight matrix of shape `(d, k)`
             which minimizes Regularized Squared Error on `x` and `y` with hyperparameter `_lambda`.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    # W = (X'X + lambda*I)^-1 X'Y
+    return np.linalg.solve(x.T @ x + _lambda * np.eye(x.shape[1]), x.T @ y)
 
 
 @problem.tag("hw1-A")
@@ -44,7 +47,8 @@ def predict(x: np.ndarray, w: np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: predictions matrix of shape `(n,)` or `(n, 1)`.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    # reverse one-hot encoding
+    return np.argmax(x @ w, axis=1)
 
 
 @problem.tag("hw1-A")
@@ -72,7 +76,8 @@ def one_hot(y: np.ndarray, num_classes: int) -> np.ndarray:
         ]
         ```
     """
-    raise NotImplementedError("Your Code Goes Here")
+    # one-hot encode y
+    return np.eye(num_classes)[y]
 
 
 def main():
@@ -87,6 +92,16 @@ def main():
 
     y_train_pred = predict(x_train, w_hat)
     y_test_pred = predict(x_test, w_hat)
+
+    idx = 0
+    for  y, y_hat in zip(y_test, y_test_pred):
+        if y != y_hat:
+            plt.imshow(x_test[idx].reshape(28, 28))
+            print(f"y: {y}, y_hat: {y_hat}")
+            plt.show()
+
+        idx += 1
+
 
     print("Ridge Regression Problem")
     print(
