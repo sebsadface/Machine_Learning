@@ -16,7 +16,7 @@ else:
 
 def plotLearningCurve(errorTrain, errorTest, regLambda, degree):
     """
-        plot computed learning curve
+    plot computed learning curve
     """
     minX = 3
     maxY = max(errorTest[minX + 1 :])
@@ -35,7 +35,7 @@ def plotLearningCurve(errorTrain, errorTest, regLambda, degree):
 
 def generateLearningCurve(X, y, degree, regLambda):
     """
-        computing learning curve via leave one out CV
+    computing learning curve via leave one out CV
     """
 
     n = len(X)
@@ -67,7 +67,7 @@ def generateLearningCurve(X, y, degree, regLambda):
 
 if __name__ == "__main__":
     """
-        Main function to test polynomial regression
+    Main function to test polynomial regression
     """
 
     allData = load_dataset("polyreg")

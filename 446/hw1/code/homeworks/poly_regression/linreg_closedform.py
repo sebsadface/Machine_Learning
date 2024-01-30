@@ -22,12 +22,12 @@ class LinearRegressionClosedForm:
 
     def fit(self, X, y):
         """
-            Trains the model
-            Arguments:
-                X is a n-by-d array
-                y is an n-by-1 array
-            Returns:
-                No return value
+        Trains the model
+        Arguments:
+            X is a n-by-d array
+            y is an n-by-1 array
+        Returns:
+            No return value
         """
         n = len(X)
 

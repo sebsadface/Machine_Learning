@@ -36,7 +36,7 @@ class TestRidgeRegressionMNIST(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
+        set_score(0.2)
 
     @visibility("visible")
     @partial_credit(0.2)
@@ -115,7 +115,12 @@ class TestRidgeRegressionMNIST(TestCase):
             y = np.array([2, 3, 1, 0])
             num_classes = 4
             expected = np.array(
-                [[0, 0, 1, 0], [0, 0, 0, 1], [0, 1, 0, 0], [1, 0, 0, 0],]
+                [
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1],
+                    [0, 1, 0, 0],
+                    [1, 0, 0, 0],
+                ]
             )
 
             actual = ridge_regression.one_hot(y, num_classes)

@@ -13,8 +13,7 @@ from utils import problem
 class PolynomialRegression:
     @problem.tag("hw1-A", start_line=5)
     def __init__(self, degree: int = 1, reg_lambda: float = 1e-8):
-        """Constructor
-        """
+        """Constructor"""
         self.degree: int = degree
         self.reg_lambda: float = reg_lambda
         # Fill in with matrix with the correct shape
@@ -59,14 +58,18 @@ class PolynomialRegression:
             You will need to apply polynomial expansion and data standardization first.
         """
         # polynomial expansion
-        H  = self.polyfeatures(X, self.degree)
+        H = self.polyfeatures(X, self.degree)
 
         n = len(X)
 
         # standardize
         self.meanX = np.mean(H, axis=0)
         self.stdX = np.std(H, axis=0)
-        H = (H - self.meanX) / self.stdX
+
+        # replace 0 and NaN with 1 to avoid division by 0 and invalid value
+        std_masked = np.nan_to_num(np.where(self.stdX == 0, 1, self.stdX), nan=1)
+
+        H = (H - self.meanX) / std_masked
 
         # add x^0 column
         H_ = np.c_[np.ones([n, 1]), H]
@@ -80,8 +83,7 @@ class PolynomialRegression:
         reg_matrix[0, 0] = 0
 
         # analytical solution (H'H + regMatrix)^-1 H' y
-        self.weight = np.linalg.solve(H_.T @ H_ + reg_matrix, H_.T @ y)
-
+        self.weight = np.linalg.pinv(H_.T @ H_ + reg_matrix) @ H_.T @ y
 
     @problem.tag("hw1-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -95,12 +97,14 @@ class PolynomialRegression:
             np.ndarray: Array of shape (n, 1) with predictions.
         """
         # polynomial expansion
-        H  = self.polyfeatures(X, self.degree)
+        H = self.polyfeatures(X, self.degree)
 
         n = len(X)
 
-        # standardize
-        H = (H - self.meanX) / self.stdX
+        # replace 0 and NaN with 1 to avoid division by 0 and invalid value
+        std_masked = np.nan_to_num(np.where(self.stdX == 0, 1, self.stdX), nan=1)
+
+        H = (H - self.meanX) / std_masked
 
         # add x^0 column
         H_ = np.c_[np.ones([n, 1]), H]
@@ -160,8 +164,10 @@ def learningCurve(
     # Fill in errorTrain and errorTest arrays
     for i in range(n):
         model = PolynomialRegression(degree=degree, reg_lambda=reg_lambda)
-        model.fit(Xtrain[0:i+1], Ytrain[0:i+1])
-        errorTrain[i] = mean_squared_error(model.predict(Xtrain[0:i+1]), Ytrain[0:i+1])
+        model.fit(Xtrain[0 : i + 1], Ytrain[0 : i + 1])
+        errorTrain[i] = mean_squared_error(
+            model.predict(Xtrain[0 : i + 1]), Ytrain[0 : i + 1]
+        )
         errorTest[i] = mean_squared_error(model.predict(Xtest), Ytest)
 
     return (errorTrain, errorTest)

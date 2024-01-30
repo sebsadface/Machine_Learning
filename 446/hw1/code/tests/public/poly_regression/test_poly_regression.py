@@ -13,7 +13,7 @@ from homeworks.poly_regression.polyreg import (
 
 class TestPolyReg(TestCase):
     @visibility("visible")
-    @partial_credit(.2)
+    @partial_credit(0.2)
     def test_polyfeatures_ones(self, set_score: Callable[[int], None]):
         try:
             X, degree, expected = np.ones((20, 1)), 3, np.ones((20, 3))
@@ -23,10 +23,10 @@ class TestPolyReg(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
+        set_score(0.2)
 
     @visibility("visible")
-    @partial_credit(.2)
+    @partial_credit(0.2)
     def test_polyfeatures_twos(self, set_score: Callable[[int], None]):
         try:
             X, degree, expected = 2 * np.ones((20, 1)), 3, np.ones((20, 3)) * [2, 4, 8]
@@ -36,11 +36,10 @@ class TestPolyReg(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
-
+        set_score(0.2)
 
     @visibility("visible")
-    @partial_credit(.2)
+    @partial_credit(0.2)
     def test_polyfeatures_fives(self, set_score: Callable[[int], None]):
         try:
             X, degree, expected = 5 * np.ones((20, 1)), 1, 5 * np.ones((20, 1))
@@ -50,10 +49,10 @@ class TestPolyReg(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
+        set_score(0.2)
 
     @visibility("visible")
-    @partial_credit(.2)
+    @partial_credit(0.2)
     def test_fit_straight_line(self, set_score: Callable[[int], None]):
         try:
             degree = 4
@@ -72,10 +71,10 @@ class TestPolyReg(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
+        set_score(0.2)
 
     @visibility("visible")
-    @partial_credit(.2)
+    @partial_credit(0.2)
     def test_fit_linear(self, set_score: Callable[[int], None]):
         try:
             degree = 2
@@ -96,7 +95,7 @@ class TestPolyReg(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
+        set_score(0.2)
 
     @visibility("visible")
     @partial_credit(0.5)
@@ -105,7 +104,7 @@ class TestPolyReg(TestCase):
             degree = 3
             reg_lambda = 1e-4
             X = np.linspace(-1, 1, 10).reshape(-1, 1)
-            y = X ** 3
+            y = X**3
             expected = [
                 0,
                 0,
@@ -179,10 +178,10 @@ class TestPolyReg(TestCase):
             degree = 3
             reg_lambda = 0
             X = np.linspace(-1, 1, 10).reshape(-1, 1)
-            y = X ** 3
+            y = X**3
             X_test = np.linspace(0, 4, 10).reshape(-1, 1)
 
-            expected = X_test ** 3
+            expected = X_test**3
 
             model = PolynomialRegression(degree=degree, reg_lambda=reg_lambda)
             model.fit(X, y)
@@ -208,7 +207,7 @@ class TestPolyReg(TestCase):
         except:  # noqa: E722
             raise
 
-        set_score(.2)
+        set_score(0.2)
 
     # Learning curve will be tested through plot submission.
 

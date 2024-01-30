@@ -1,8 +1,7 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 from utils import load_dataset, problem
-
-import matplotlib.pyplot as plt
 
 
 @problem.tag("hw1-A")
@@ -81,7 +80,6 @@ def one_hot(y: np.ndarray, num_classes: int) -> np.ndarray:
 
 
 def main():
-
     (x_train, y_train), (x_test, y_test) = load_dataset("mnist")
     # Convert to one-hot
     y_train_one_hot = one_hot(y_train.reshape(-1), 10)
@@ -94,14 +92,13 @@ def main():
     y_test_pred = predict(x_test, w_hat)
 
     idx = 0
-    for  y, y_hat in zip(y_test, y_test_pred):
+    for y, y_hat in zip(y_test, y_test_pred):
         if y != y_hat:
             plt.imshow(x_test[idx].reshape(28, 28))
             print(f"y: {y}, y_hat: {y_hat}")
             plt.show()
 
         idx += 1
-
 
     print("Ridge Regression Problem")
     print(

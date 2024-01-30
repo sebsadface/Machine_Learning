@@ -10,7 +10,7 @@ else:
 
 if __name__ == "__main__":
     """
-        Main function to test polynomial regression
+    Main function to test polynomial regression
     """
 
     # load the data
