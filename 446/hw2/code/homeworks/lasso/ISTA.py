@@ -23,9 +23,14 @@ def step(
 
     Returns:
         Tuple[np.ndarray, float]: Tuple with 2 entries. First represents updated weight vector, second represents bias.
-    
+
     """
-    raise NotImplementedError("Your Code Goes Here")
+    err =  X @ weight + bias - y # (n, )
+    b = bias - 2 * eta * np.sum(err)
+    w = weight - 2 * eta * X.T @ err
+    w = np.sign(w) * np.maximum(np.abs(w) - 2 * _lambda * eta, 0)
+
+    return w, b
 
 
 @problem.tag("hw2-A")
@@ -44,7 +49,7 @@ def loss(
     Returns:
         float: value of the loss function
     """
-    raise NotImplementedError("Your Code Goes Here")
+    return np.sum((X @ weight + bias - y) ** 2) + _lambda * np.sum(np.abs(weight))
 
 
 @problem.tag("hw2-A", start_line=5)
@@ -89,12 +94,19 @@ def train(
                     Training function that does not return a fully usable model is just weird.
                 - You will use bias in next problem.
     """
-    if start_weight is None:
-        start_weight = np.zeros(X.shape[1])
-        start_bias = 0
+    w = np.zeros(X.shape[1]) if start_weight is None else start_weight
+    b = 0 if start_bias is None else start_bias
     old_w: Optional[np.ndarray] = None
     old_b: Optional[np.ndarray] = None
-    raise NotImplementedError("Your Code Goes Here")
+
+    while True:
+        old_w = np.copy(w)
+        old_b = b
+        w, b = step(X, y, w, b, _lambda, eta)
+        if convergence_criterion(w, old_w, b, old_b, convergence_delta):
+            break
+
+    return w, b
 
 
 @problem.tag("hw2-A")
@@ -115,16 +127,75 @@ def convergence_criterion(
     Returns:
         bool: False, if weight and bias has not converged yet. True otherwise.
     """
-    raise NotImplementedError("Your Code Goes Here")
-
+    return np.max(np.abs(weight - old_w)) < convergence_delta and np.abs(bias - old_b) < convergence_delta
 
 @problem.tag("hw2-A")
 def main():
     """
     Use all of the functions above to make plots.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    n = 500
+    d = 1000
+    k = 100
+    sigma = 1
 
+    epsilon = np.random.randn(n) * sigma
+    X = np.random.randn(n, d)
+    w = np.array([j/k if j <= k else 0 for j in range(1, d + 1)])
+    print(w)
+    y = X @ w + epsilon
+
+    # standardize
+    X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
+
+    # see Equation (1)
+    lambda_max = 2 * np.abs(X.T @ (y - np.mean(y))).max()
+
+    eta = 1e-4
+    lam = lambda_max
+    convergence_delta = 1e-4
+
+    weights = []
+    lambdas = []
+    fdr_s = []
+    tpr_s = []
+    non_zero_counts = []
+
+    while True:
+        weight, _ = train(X, y, _lambda=lam, eta=eta, convergence_delta=convergence_delta)
+
+        chosen_w = weight != 0
+        actual_w = w != 0
+        false_discov = np.logical_and(chosen_w, ~actual_w)
+        true_pos = np.logical_and(chosen_w, actual_w)
+        fdr = false_discov.sum() / chosen_w.sum() if chosen_w.sum() > 0 else 0
+        tpr = true_pos.sum() / k
+
+        fdr_s.append(fdr)
+        tpr_s.append(tpr)
+        lambdas.append(lam)
+        weights.append(weight)
+        non_zero_counts.append(chosen_w.sum())
+
+        print ("Lambda:", lam, " Non-zero weights:", non_zero_counts[-1], " FDR:", fdr, " TPR:", tpr)
+
+        if non_zero_counts[-1] == d:
+            break
+
+        lam /= 2
+
+    plt.plot(lambdas, non_zero_counts)
+    plt.xscale('log')
+    plt.xlabel('λ')
+    plt.ylabel('Number of non-zero weights')
+    plt.title('The number of non-zero weights as a function of λ')
+    plt.show()
+
+    plt.plot(fdr_s, tpr_s)
+    plt.xlabel('FDR')
+    plt.ylabel('TPR')
+    plt.title('FDR vs TPR for different values of λ')
+    plt.show()
 
 if __name__ == "__main__":
     main()

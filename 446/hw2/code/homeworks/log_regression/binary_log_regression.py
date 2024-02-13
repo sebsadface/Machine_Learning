@@ -43,7 +43,6 @@ class BinaryLogReg:
         # Fill in with matrix with the correct shape
         self.weight: np.ndarray = None  # type: ignore
         self.bias: float = 0.0
-        raise NotImplementedError("Your Code Goes Here")
 
     @problem.tag("hw2-A")
     def mu(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -62,7 +61,7 @@ class BinaryLogReg:
         Returns:
             np.ndarray: An `(n, )` vector containing mu_i for i^th element.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return 1 / (1 + np.exp(-y * (self.bias + X @ self.weight)))
 
     @problem.tag("hw2-A")
     def loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -78,7 +77,7 @@ class BinaryLogReg:
         Returns:
             float: Loss given X, y, self.weight, self.bias and self._lambda
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return np.mean(np.log(1 + np.exp(-y * (self.bias + X @ self.weight)))) + self._lambda * np.sum(self.weight ** 2)
 
     @problem.tag("hw2-A")
     def gradient_J_weight(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
@@ -93,7 +92,7 @@ class BinaryLogReg:
         Returns:
             np.ndarray: An `(d, )` vector which represents gradient of loss J with respect to self.weight.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return -np.mean((1 - self.mu(X, y))[:, np.newaxis] * y[:, np.newaxis] * X, axis=0) + 2 * self._lambda * self.weight
 
     @problem.tag("hw2-A")
     def gradient_J_bias(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -109,7 +108,7 @@ class BinaryLogReg:
         Returns:
             float: A number that represents gradient of loss J with respect to self.bias.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return -np.mean((1 - self.mu(X, y)) * y)
 
     @problem.tag("hw2-A")
     def predict(self, X: np.ndarray) -> np.ndarray:
@@ -123,7 +122,7 @@ class BinaryLogReg:
         Returns:
             np.ndarray: An `(n, )` array of either -1s or 1s representing guess for each observation.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return np.sign(X @ self.weight + self.bias)
 
     @problem.tag("hw2-A")
     def misclassification_error(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -140,7 +139,7 @@ class BinaryLogReg:
         Returns:
             float: percentage of times prediction did not match target, given an observation (i.e. misclassification error).
         """
-        raise NotImplementedError("Your Code Goes Here")
+        return np.mean(self.predict(X) != y)
 
     @problem.tag("hw2-A")
     def step(self, X: np.ndarray, y: np.ndarray, learning_rate: float = 1e-4):
@@ -156,7 +155,8 @@ class BinaryLogReg:
             learning_rate (float, optional): Learning rate of SGD/GD algorithm.
                 Defaults to 1e-4.
         """
-        raise NotImplementedError("Your Code Goes Here")
+        self.weight -= learning_rate * self.gradient_J_weight(X, y)
+        self.bias -= learning_rate * self.gradient_J_bias(X, y)
 
     @problem.tag("hw2-A", start_line=7)
     def train(
@@ -165,9 +165,9 @@ class BinaryLogReg:
         y_train: np.ndarray,
         X_test: np.ndarray,
         y_test: np.ndarray,
-        learning_rate: float = 1e-2,
-        epochs: int = 30,
-        batch_size: int = 100,
+        learning_rate: float = 1e-1,
+        epochs: int = 100,
+        batch_size: int = 1,
     ) -> Dict[str, List[float]]:
         """Train function that given dataset X_train and y_train adjusts weights and biases of this model.
         It also should calculate misclassification error and J loss at the END of each epoch.
@@ -214,11 +214,32 @@ class BinaryLogReg:
             "test_losses": [],
             "test_errors": [],
         }
-        raise NotImplementedError("Your Code Goes Here")
+
+        self.weight = np.zeros(X_train.shape[1]) if self.weight is None else self.weight
+        for epoch in range(epochs):
+            # Mini-batch
+            for _ in range(num_batches):
+                idxs = RNG.choice(len(X_train), batch_size)
+                X_batch = X_train[idxs]
+                y_batch = y_train[idxs]
+
+                self.step(X_batch, y_batch, learning_rate)
+            # self.step(X_train, y_train, learning_rate)
+
+            result['train_losses'].append(self.loss(X_train, y_train))
+            result['train_errors'].append(self.misclassification_error(X_train, y_train))
+            result['test_losses'].append(self.loss(X_test, y_test))
+            result['test_errors'].append(self.misclassification_error(X_test, y_test))
+
+            print(f"epoch {epoch+1}/{epochs}:")
+            print(f"train loss: {result['train_losses'][-1]}, train error: {result['train_errors'][-1]}")
+            print(f"test loss: {result['test_losses'][-1]}, test error: {result['test_errors'][-1]}")
+        print("batch_size", batch_size, "num_batches", num_batches)
+        return result
 
 
 if __name__ == "__main__":
-    model = BinaryLogReg()
+    model = BinaryLogReg(_lambda=1e-1)
     (x_train, y_train), (x_test, y_test) = load_2_7_mnist()
     history = model.train(x_train, y_train, x_test, y_test)
 
