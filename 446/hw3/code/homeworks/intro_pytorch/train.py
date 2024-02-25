@@ -50,7 +50,49 @@ def train(
         - Make sure to load the model parameters corresponding to model with the best validation loss (if val_loader is provided).
             You might want to look into state_dict: https://pytorch.org/tutorials/beginner/saving_loading_models.html
     """
-    raise NotImplementedError("Your Code Goes Here")
+    train_losses = []
+    val_losses = []
+    best_val_loss = float('inf')
+    best_state = None
+
+    for _ in range(epochs):
+        running_loss = 0.0
+        for x_batch, y_batch in train_loader:
+            if x_batch.dim() == 1:
+                x_batch = x_batch.unsqueeze(0)
+
+            optimizer.zero_grad()
+            y_pred = model(x_batch)
+            loss = criterion(y_pred, y_batch)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+        train_losses.append(running_loss / len(train_loader))
+
+        print(f"Epoch: {_ + 1}, Loss: {train_losses[-1]}")
+
+        if val_loader is not None:
+            val_loss = 0.0
+            with torch.no_grad():
+                for x_val, y_val in val_loader:
+                    if x_val.dim() == 1:
+                        x_val = x_val.unsqueeze(0)
+
+                    y_val_pred = model(x_val)
+                    val_loss += criterion(y_val_pred, y_val).item()
+            val_loss /= len(val_loader)
+            val_losses.append(val_loss)
+
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_state = model.state_dict()
+
+    if val_loader is not None and best_state is not None:
+        model.load_state_dict(best_state)
+
+    return {'train': train_losses, 'val': val_losses if val_loader is not None else []}
 
 
 def plot_model_guesses(

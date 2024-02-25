@@ -45,7 +45,15 @@ def accuracy_score(model: nn.Module, dataloader: DataLoader) -> float:
         - This is similar to CrossEntropy accuracy_score function,
             but there will be differences due to slightly different targets in dataloaders.
     """
-    raise NotImplementedError("Your Code Goes Here")
+    correct, total = 0, 0
+    with torch.no_grad():
+        for x, y in dataloader:
+            outputs = model(x)
+            predicted = outputs.max(1, keepdim=True)[1]
+            true = y.max(1, keepdim=True)[1]
+            correct += predicted.eq(true).sum().item()
+            total += y.size(0)
+    return correct / total
 
 
 @problem.tag("hw3-A")
@@ -84,7 +92,31 @@ def mse_parameter_search(
                 }
             }
     """
-    raise NotImplementedError("Your Code Goes Here")
+    results = {}
+
+    models = {
+        "Linear": [LinearLayer(2, 2)],
+        "Sigmoid": [LinearLayer(2, 2), SigmoidLayer(), LinearLayer(2, 2)],
+        "ReLU": [LinearLayer(2, 2), ReLULayer(), LinearLayer(2, 2)],
+        "Sigmoid + ReLU": [LinearLayer(2, 2), SigmoidLayer(), LinearLayer(2, 2), ReLULayer(), LinearLayer(2, 2)],
+        "ReLU + Sigmoid": [LinearLayer(2, 2), ReLULayer(), LinearLayer(2, 2), SigmoidLayer(), LinearLayer(2, 2)],
+    }
+
+
+    for name, layers in models.items():
+        model = nn.Sequential(*layers)
+        optimizer = SGDOptimizer(model.parameters(), lr=1e-2)
+        criterion = MSELossLayer()
+
+        history = train(dataset_train, model, criterion, optimizer, dataset_val, epochs=20)
+        print(f"Model: {name}, Train Loss: {history['train'][-1]}, Val Loss: {history['val'][-1]}")
+        results[name] = {
+            "train": history['train'],
+            "val": history['val'],
+            "model": model
+        }
+
+    return results
 
 
 @problem.tag("hw3-A", start_line=11)
@@ -114,7 +146,26 @@ def main():
     )
 
     mse_configs = mse_parameter_search(dataset_train, dataset_val)
-    raise NotImplementedError("Your Code Goes Here")
+
+    best_model_name = min(mse_configs, key=lambda name: min(mse_configs[name]['val']))
+    best_model = mse_configs[best_model_name]['model']
+    print(f"Best model based on validation loss: {best_model_name}")
+
+    dataloader_test = DataLoader(dataset_test, batch_size=64, shuffle=False)
+    plot_model_guesses(dataloader_test, best_model)
+
+    test_accuracy = accuracy_score(best_model, dataloader_test)
+    print(f"Accuracy of the best model on the test set: {test_accuracy:.2f}")
+
+    for name, result in mse_configs.items():
+        plt.plot(result['train'], label=f'{name} - train')
+        plt.plot(result['val'], '--', label=f'{name} - val')
+
+    plt.title("Mean Squared Error Search")
+    plt.xlabel("Epochs")
+    plt.ylabel("MSE Loss")
+    plt.legend()
+    plt.show()
 
 
 def to_one_hot(a: np.ndarray) -> np.ndarray:
