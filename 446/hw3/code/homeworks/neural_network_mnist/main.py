@@ -203,7 +203,6 @@ def main():
     print(f'Total number of parameters in F1: {f1_params}')
     print(f'Total number of parameters in F2: {f2_params}')
 
-    plt.figure(figsize=(10, 5))
     plt.plot(f1_losses, label='F1 Loss')
     plt.title('F1')
     plt.xlabel('Epoch')
@@ -211,7 +210,6 @@ def main():
     plt.legend()
     plt.show()
 
-    plt.figure(figsize=(10, 5))
     plt.plot(f2_losses, label='F2 Loss')
     plt.title('F2')
     plt.xlabel('Epoch')
